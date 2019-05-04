@@ -229,7 +229,7 @@ class PygButton(object):
     def draw(self, surfaceObj):
         """Blit the current button's appearance to the surface object."""
         if self._visible:
-            if self.buttonDown:
+            if any(self.buttonDown):
                 surfaceObj.blit(self.surfaceDown, self._rect)
             elif self.mouseOverButton:
                 surfaceObj.blit(self.surfaceHighlight, self._rect)
