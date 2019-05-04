@@ -92,9 +92,9 @@ class PygButton(object):
             self._font = font
 
         # tracks the state of the button
-        self.buttonDown = False # is the button currently pushed down?
+        self.buttonDown = [False, False, False] # is the button currently pushed down?
         self.mouseOverButton = False # is the mouse currently hovering over the button?
-        self.lastMouseDownOverButton = False # was the last mouse down event over the mouse button? (Used to track clicks.)
+        self.lastMouseDownOverButton = [False, False, False] # was the last mouse down event over the mouse button? (Used to track clicks.)
         self._visible = True # is the button visible
         self.customSurfaces = False # button starts as a text button instead of having custom images for each surface
         self.hotkeys = hotkeys if type(hotkeys) is list else [hotkeys]
@@ -125,12 +125,19 @@ class PygButton(object):
 
         buttonDown is always True when mouseDown() is called, and always False
         when mouseUp() or mouseClick() is called. lastMouseDownOverButton is
-        always False when mouseUp() or mouseClick() is called."""
+        always False when mouseUp() or mouseClick() is called.
+
+        NOTE: This help text needs to be modified for the different button
+        clicks and hotkeys."""
 
         retVal = []
 
         # mouse-related events (and is visible)
         if eventObj.type in (MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN) and self._visible:
+
+            # get mouse button clicked (-1 to match with indexing)
+            if eventObj.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+                buttonIndex = eventObj.button - 1
 
             hasExited = False
             if not self.mouseOverButton and self._rect.collidepoint(eventObj.pos):
@@ -149,31 +156,52 @@ class PygButton(object):
                     self.mouseMove(eventObj)
                     retVal.append('move')
                 elif eventObj.type == MOUSEBUTTONDOWN:
-                    self.buttonDown = True
-                    self.lastMouseDownOverButton = True
-                    self.mouseDown(eventObj)
-                    retVal.append('down')
+                    self.buttonDown[buttonIndex] = True
+                    self.lastMouseDownOverButton[buttonIndex] = True
+                    if buttonIndex == 0:
+                        self.mouseLeftDown(eventObj)
+                        retVal.append('left_down')
+                    if buttonIndex == 1:
+                        self.mouseMiddleDown(eventObj)
+                        retVal.append('middle_down')
+                    if buttonIndex == 2:
+                        self.mouseRightDown(eventObj)
+                        retVal.append('right_down')
             else:
                 if eventObj.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
                     # if an up/down happens off the button, then the next up won't cause mouseClick()
-                    self.lastMouseDownOverButton = False
+                    self.lastMouseDownOverButton[buttonIndex] = False
 
             # mouse up is handled whether or not it was over the button
             doMouseClick = False
             if eventObj.type == MOUSEBUTTONUP:
-                if self.lastMouseDownOverButton:
+                if self.lastMouseDownOverButton[buttonIndex]:
                     doMouseClick = True
-                self.lastMouseDownOverButton = False
+                self.lastMouseDownOverButton[buttonIndex] = False
 
-                if self.buttonDown:
-                    self.buttonDown = False
-                    self.mouseUp(eventObj)
-                    retVal.append('up')
+                if self.buttonDown[buttonIndex]:
+                    self.buttonDown[buttonIndex] = False
+                    if buttonIndex == 0:
+                        self.mouseLeftUp(eventObj)
+                        retVal.append('left_up')
+                    if buttonIndex == 1:
+                        self.mouseMiddleUp(eventObj)
+                        retVal.append('middle_up')
+                    if buttonIndex == 2:
+                        self.mouseRightUp(eventObj)
+                        retVal.append('right_up')
 
                 if doMouseClick:
-                    self.buttonDown = False
-                    self.mouseClick(eventObj)
-                    retVal.append('click')
+                    self.buttonDown[buttonIndex] = False
+                    if buttonIndex == 0:
+                        self.mouseLeftClick(eventObj)
+                        retVal.append('left_click')
+                    if buttonIndex == 1:
+                        self.mouseMiddleClick(eventObj)
+                        retVal.append('middle_click')
+                    if buttonIndex == 2:
+                        self.mouseRightClick(eventObj)
+                        retVal.append('right_click')
 
             if hasExited:
                 self.mouseExit(eventObj)
@@ -254,18 +282,39 @@ class PygButton(object):
         self.surfaceHighlight = self.surfaceNormal
 
 
-    def mouseClick(self, event):
-        pass # This class is meant to be overridden.
+    # mouse movement
     def mouseEnter(self, event):
         pass # This class is meant to be overridden.
     def mouseMove(self, event):
         pass # This class is meant to be overridden.
     def mouseExit(self, event):
         pass # This class is meant to be overridden.
-    def mouseDown(self, event):
+
+    # left mouse functions
+    def mouseLeftDown(self, event):
         pass # This class is meant to be overridden.
-    def mouseUp(self, event):
+    def mouseLeftUp(self, event):
         pass # This class is meant to be overridden.
+    def mouseLeftClick(self, event):
+        pass # This class is meant to be overridden.
+
+    # middle mouse functions
+    def mouseMiddleDown(self, event):
+        pass # This class is meant to be overridden.
+    def mouseMiddleUp(self, event):
+        pass # This class is meant to be overridden.
+    def mouseMiddleClick(self, event):
+        pass # This class is meant to be overridden.
+
+    # right mouse functions
+    def mouseRightDown(self, event):
+        pass # This class is meant to be overridden.
+    def mouseRightUp(self, event):
+        pass # This class is meant to be overridden.
+    def mouseRightClick(self, event):
+        pass # This class is meant to be overridden.
+
+    # hotkey presses
     def hotkeyDown(self, event):
         pass # This class is meant to be overridden.
     def hotkeyUp(self, event):
