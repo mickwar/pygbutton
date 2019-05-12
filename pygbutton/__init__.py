@@ -92,9 +92,9 @@ class PygButton(object):
             self._font = font
 
         # tracks the state of the button
-        self.buttonDown = [False, False, False] # is the button currently pushed down?
+        self.buttonDown = [False, False, False, False, False] # is the button currently pushed down?
         self.mouseOverButton = False # is the mouse currently hovering over the button?
-        self.lastMouseDownOverButton = [False, False, False] # was the last mouse down event over the mouse button? (Used to track clicks.)
+        self.lastMouseDownOverButton = [False, False, False, False, False] # was the last mouse down event over the mouse button? (Used to track clicks.)
         self._visible = True # is the button visible
         self.customSurfaces = False # button starts as a text button instead of having custom images for each surface
         self.hotkeys = hotkeys if type(hotkeys) is list else [hotkeys]
